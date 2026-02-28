@@ -17,6 +17,7 @@ const Features = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-16 lg:gap-24">
+            
             {/*JOB SEEKERES SECTION */}
             <div>
                 <div className="text-center mb-12">
@@ -44,22 +45,23 @@ const Features = () => {
             
             {/* EMPLOYERS SECTION */}
             <div>
-                <div>
-                    <h3>
+                <div className="text-center mb-12">
+                    <h3 className="text-3xl font-bold text-gray-900 mb-4">
                         For Employers
                     </h3>
-                    <div/>
+                    <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto rounded-full"/>
                 </div>
 
-                <div>
+                <div className="space-y-8">
                     {employerFeatures.map((feature, index) => (
-                        <div key={index}>
-                            <div>
-                                <feature.icon className="" />
+                        <div className="flex items-start space-x-6 p-6 group rounded-2xl hover:bg-blue-50 cursor-poiter transition-all duration-300 cursor-pointer" 
+                        key={index}>
+                            <div className="w-12 h-12 bg-gradient-to-r from-blue-300 to-purple-300 rounded-xl flex items-center justify-center text-blue p-4 group-hover:from-blue-400 group-hover:to-purple-400 transition-colors duration-300">
+                                <feature.icon className="w-6 h6" />
                             </div>
                             <div>
-                                <h4>{feature.title}</h4>
-                                <p>{feature.description}</p>
+                                <h4 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h4>
+                                <p className="leading-relaxed text-gray-600">{feature.description}</p>
                             </div>
                         </div>
                     ))}

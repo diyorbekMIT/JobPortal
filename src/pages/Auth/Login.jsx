@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from "framer-motion"
 import {
   Mail,
@@ -7,6 +7,7 @@ import {
   EyeOff,
   Loader,
   AlertCircle,
+  CheckCircle
 } from "lucide-react"
 
 const Login = () => {
@@ -23,15 +24,26 @@ const Login = () => {
     success: false
   })
 
+
+  
+
+  // Auto-redirect after success
+  useEffect(() => {
+    if (formState.success) {
+      const timer = setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 2500)
+      return () => clearTimeout(timer)
+    }
+  }, [formState.success])
+
   // Validation functions
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  const validatePassword = (password) => {
-    return password.length >= 6
-  }
+  const validatePassword = (password) => password.length >= 6
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -52,7 +64,6 @@ const Login = () => {
     if (!validateEmail(formData.email)) {
       errors.email = "Please enter a valid email address"
     }
-
     if (!validatePassword(formData.password)) {
       errors.password = "Password must be at least 6 characters long"
     }
@@ -70,6 +81,10 @@ const Login = () => {
 
     try {
       // Login API integration here
+      // await axios.post('/api/auth/login', formData)
+
+      // On success:
+      setFormState(prev => ({ ...prev, loading: false, success: true }))
     } catch (error) {
       setFormState(prev => ({
         ...prev,
@@ -82,6 +97,39 @@ const Login = () => {
     }
   }
 
+  // ✅ Success Screen
+  if (formState.success) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gray-50 px-4'>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className='bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center'
+        >
+          <CheckCircle className='w-16 h-16 text-green-500 mx-auto mb-4' />
+          <h2 className='text-2xl font-bold text-gray-900 mb-2'>Welcome Back!</h2>
+          <p className='text-gray-600 mb-6'>
+            You have been successfully logged in.
+          </p>
+
+          {/* Animated progress bar */}
+          <div className='w-full bg-gray-100 rounded-full h-1.5 mb-3 overflow-hidden'>
+            <motion.div
+              initial={{ width: '0%' }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 2.5, ease: 'linear' }}
+              className='h-1.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full'
+            />
+          </div>
+
+          <p className='text-sm text-gray-400'>Redirecting to your dashboard...</p>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // 🔐 Login Form
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-50 px-4'>
       <motion.div
@@ -146,10 +194,7 @@ const Login = () => {
                 onClick={() => setFormState(prev => ({ ...prev, showPassword: !prev.showPassword }))}
                 className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400'
               >
-                {formState.showPassword
-                  ? <EyeOff className='w-5 h-5' />
-                  : <Eye className='w-5 h-5' />
-                }
+                {formState.showPassword ? <EyeOff className='w-5 h-5' /> : <Eye className='w-5 h-5' />}
               </button>
             </div>
             {formState.errors.password && (

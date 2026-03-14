@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { motion } from "framer-motion"
 import {
   Mail,
@@ -9,9 +9,12 @@ import {
   AlertCircle,
 } from "lucide-react"
 import axiosInstance from '../../utils/axiosInstance'
-import API from "../../utils//apiPath"
+import {p} from "../../utils//apiPath";
+import {useAuth} from '../../context/AuthContext'
+
 
 const Login = () => {
+  const {login} = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -72,8 +75,32 @@ const Login = () => {
 
     try {
       // Login API integration here
+      
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe
+      });
+      
+      setFormState((prev) => ({
+        ...prev,
+        loading: false,
+        success: true,
+        errors: {}
+      }))
 
-      const response = await axiosInstance
+      const {token, role} = response.data;
+
+      if(token) {
+        login(response.data, token);
+
+        //Redirect based on role
+        setTimeout(() => {
+          window.location.href = role === "employer" 
+            ? "/employer-dashboard" 
+            : "/find-jobs"
+        })
+      }
     } catch (error) {
       setFormState(prev => ({
         ...prev,

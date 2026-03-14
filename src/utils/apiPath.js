@@ -2,11 +2,11 @@ export const BASE_URL = "http://localhost:8000";
 
 export const API_PATHS = {
   AUTH: {
-    REGISTER: "/api/auth/register",
-    LOGIN: "/api/auth/login",
-    GET_PROFILE: "/api/auth/profile",
-    UPDATE_PROFILE: "/api/user/profile",
-    DELETE_RESUME: "/api/user/resume",
+    REGISTER: "/api/auth/register", // Signup user & return JWT token
+    LOGIN: "/api/auth/login",       // Authenticate user & return JWT token
+    GET_PROFILE: "/api/user/profile", // Get logged-in user details
+    UPDATE_PROFILE: "/api/user/profile", // Update profile details
+    DELETE_RESUME: "/api/user/resume", // Delete resume details
   },
   DASHBOARD: {
     OVERVIEW: `/api/analytics/overview`,
@@ -22,7 +22,12 @@ export const API_PATHS = {
     SAVE_JOB: (id) => `/api/save-jobs/${id}`,
     GET_SAVED_JOBS: '/api/save-jobs/my',
   },
+  APPLICATIONS: {
+    APPLY_TO_JOB: (id) => `/api/applications/${id}`,
+    GET_ALL_APPLICATIONS: (id) => `/api/applications/job/${id}`,
+    UPDATE_STATUS: (id) => `/api/applications/${id}/status`,
+  },
   IMAGE: {
-    UPLOAD_IMAGE: "/api/image/upload"
+    UPLOAD_IMAGE: "/api/image/upload",
   }
 };

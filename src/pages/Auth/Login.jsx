@@ -8,6 +8,8 @@ import {
   Loader,
   AlertCircle,
 } from "lucide-react"
+import axiosInstance from '../../utils/axiosInstance'
+import API from "../../utils//apiPath"
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -70,6 +72,8 @@ const Login = () => {
 
     try {
       // Login API integration here
+
+      const response = await axiosInstance
     } catch (error) {
       setFormState(prev => ({
         ...prev,

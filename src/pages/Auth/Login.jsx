@@ -14,7 +14,7 @@ import {API_PATHS} from "../../utils//apiPath";
 import {useAuth} from '../../context/AuthContext'
 
 const Login = () => {
-  const {login} = useAuth();
+  const {login, user} = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -32,14 +32,14 @@ const Login = () => {
   useEffect(() => {
     if (formState.success) {
       const timer = setTimeout(() => {
-        const {role} = login || {};
+        const role = user?.role;
         window.location.href = role === "employer" 
           ? "/employer-dashboard" 
           : "/find-jobs"
       }, 2500)
       return () => clearTimeout(timer)
     }
-  }, [formState.success, login])
+  }, [formState.success, user])
 
   // Validation functions
   const validateEmail = (email) => {
@@ -92,16 +92,18 @@ const Login = () => {
       
       const {token, role} = response.data;
 
+      
+
+      if(token) {
+        login(response.data, token);
+      }
+
       setFormState((prev) => ({
         ...prev,
         loading: false,
         success: true,
         errors: {}
       }))
-
-      if(token) {
-        login(response.data, token);
-      }
     } catch (error) {
       setFormState(prev => ({
         ...prev,

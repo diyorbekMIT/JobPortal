@@ -3,39 +3,33 @@ import { BASE_URL } from "./apiPath";
 
 const axiosInstance = axios.create({
     baseURL: BASE_URL,
-    timeout: 10000, // 8 seconds
+    timeout: 10000,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// ─────────────────────────────────────────
-// Request Interceptor — Adds token to every request
-// ─────────────────────────────────────────
+// Request Interceptor
 axiosInstance.interceptors.request.use(
     (config) => {
-        const accessToken = localStorage.getItem("accessToken");
+        const accessToken = localStorage.getItem("token"); // ✅ correct key
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
-// ─────────────────────────────────────────
-// Response Interceptor — Handles errors globally
-// ─────────────────────────────────────────
+// Response Interceptor
 axiosInstance.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
     (error) => {
         if (error.response) {
             if (error.response.status === 401) {
-                window.location.href = "/";
+                localStorage.removeItem("token");  // ✅ clean up
+                localStorage.removeItem("user");
+                window.location.href = "/login";   // ✅ go to login, not "/"
             } else if (error.response.status === 500) {
                 console.error("Server error. Please try again later.");
             }

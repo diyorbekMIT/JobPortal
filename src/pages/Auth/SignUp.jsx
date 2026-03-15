@@ -15,6 +15,7 @@ import {
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from "../../utils/apiPath";
 import { useAuth } from '../../context/AuthContext'
+import uploadImage from '../../utils/uploadImage';
 
 const Signup = () => {
   const { login } = useAuth();
@@ -121,25 +122,41 @@ const Signup = () => {
     setFormState(prev => ({ ...prev, loading: true }))
 
     try {
-      const formDataToSend = new FormData()
-      formDataToSend.append('fullName', formData.fullName)
-      formDataToSend.append('email', formData.email)
-      formDataToSend.append('password', formData.password)
-      formDataToSend.append('role', formData.role)
-      if (formData.profileImage) {
-        formDataToSend.append('profileImage', formData.profileImage)
+      let avatarUrl = "";
+
+      if(formData.profileImage) {
+        const imgUploadRes = await uploadImage(formData.profileImage);
+        avatarUrl = imgUploadRes.imageUrl || ""; // ✅ Adjust based on your API response
       }
 
-      const response = await axiosInstance.post(API_PATHS.AUTH.SIGNUP, formDataToSend, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        avatar: avatarUrl || ''
+      })
 
-      const { token } = response.data;
+      setFormState((prev) => (
+        {
+          ...prev,
+          loading: false,
+          success: true,
+          errors: {}
+        }
+      ));
 
-      setFormState(prev => ({ ...prev, loading: false, success: true, errors: {} }))
+      const { token, user } = response.data;
 
-      if (token) {
+      if(token){
         login(response.data, token);
+
+        //Reirect based on role
+        setTimeout(() => {
+          window.location.href = formData.role === "employer"
+            ? "/employer-dashboarad"
+            : "find-jobs/"
+        }, 3000)
       }
     } catch (error) {
       setFormState(prev => ({
@@ -260,7 +277,7 @@ const Signup = () => {
               {formState.errors.email && (
                 <p className='flex items-center mt-1.5 text-sm text-red-600'>
                   <AlertCircle className='w-4 h-4 mr-1 flex-shrink-0' />
-                  {formState.errors.email}
+                  {formState.errors.email} 
                 </p>
               )}
             </div>
@@ -390,15 +407,15 @@ const Signup = () => {
               <div className='grid grid-cols-2 gap-3'>
                 <button
                   type='button'
-                  onClick={() => setFormData(prev => ({ ...prev, role: 'candidate' }))}
+                  onClick={() => setFormData(prev => ({ ...prev, role: 'jobseeker' }))}
                   className={`p-4 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all ${
-                    formData.role === 'candidate'
+                    formData.role === 'jobseeker'
                       ? 'border-blue-500 bg-blue-50 shadow-sm'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  <User className={`w-7 h-7 ${formData.role === 'candidate' ? 'text-blue-600' : 'text-gray-400'}`} />
-                  <span className={`font-semibold text-sm ${formData.role === 'candidate' ? 'text-blue-700' : 'text-gray-700'}`}>
+                  <User className={`w-7 h-7 ${formData.role === 'jobseeker' ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <span className={`font-semibold text-sm ${formData.role === 'jobseeker' ? 'text-blue-700' : 'text-gray-700'}`}>
                     Job Seeker
                   </span>
                   <span className='text-xs text-gray-400'>Looking for opportunities</span>

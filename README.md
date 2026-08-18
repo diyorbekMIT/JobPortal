@@ -1,27 +1,32 @@
 go-rabbitmq
 A wrapper of rabbitmq/amqp091-go that provides reconnection logic and sane defaults. Hit the project with a star if you find it useful ⭐
 
-Supported by Boot.dev. If you'd like to learn about RabbitMQ and Go, you can check out my course here.
+Supported by Boot.dev. If you'd like to learn about RabbitMQ and Go, check out the course here.
 
 Motivation
-Streadway's AMQP library is currently the most robust and well-supported Go client I'm aware of. It's a fantastic option and I recommend starting there and seeing if it fulfills your needs. Their project has made an effort to stay within the scope of the AMQP protocol, as such, no reconnection logic and few ease-of-use abstractions are provided.
+Streadway's AMQP library is a robust and well-supported Go client. It is a great option when you need a low-level AMQP client, but it intentionally stays close to the AMQP protocol and does not provide reconnection logic or many ease-of-use abstractions.
 
 Goal
-The goal with go-rabbitmq is to provide most (but not all) of the nitty-gritty functionality of Streadway's AMQP, but to make it easier to work with via a higher-level API. go-rabbitmq is also built specifically for Rabbit, not for the AMQP protocol. In particular, we want:
+go-rabbitmq provides much of the useful functionality of an AMQP client through a higher-level API designed specifically for RabbitMQ. The project focuses on:
 
-✅ Automatic reconnection
+Automatic reconnection
 
-✅ Multithreaded consumers via a handler function
+Multithreaded consumers through handler functions
 
-✅ Reasonable defaults
+Reasonable defaults
 
-✅ Flow control handling
+Flow-control handling
 
-✅ TCP block handling
+TCP-block handling
 
 Quick Start
+Installation
+Inside a Go module:
+
+bash
+go get github.com/wagslane/go-rabbitmq
 Consumer
-Take note of the optional options parameters after the queue name. The queue will be declared automatically, but the exchange will not. You'll also probably want to bind to at least one routing key.
+The queue is declared automatically. Exchanges are not declared unless you enable the exchange-declaration option. Consumers can also declare routing-key bindings.
 
 go
 conn, err := rabbitmq.NewConn(
@@ -47,14 +52,13 @@ defer consumer.Close()
 
 err = consumer.Run(func(d rabbitmq.Delivery) rabbitmq.Action {
     log.Printf("consumed: %v", string(d.Body))
-    // rabbitmq.Ack, rabbitmq.NackDiscard, rabbitmq.NackRequeue
     return rabbitmq.Ack
 })
 if err != nil {
     log.Fatal(err)
 }
 Publisher
-The exchange is not declared by default, that's why I recommend using the following options.
+The exchange is not declared by default, so use the exchange options when the application should create it automatically.
 
 go
 conn, err := rabbitmq.NewConn(
@@ -87,51 +91,54 @@ if err != nil {
     log.Println(err)
 }
 Usage
-Installation
-Inside a Go module:
+Options and configuration
+Queues are declared automatically by new consumers unless configured otherwise.
+
+Routing-key bindings are declared by consumers when WithConsumerOptionsRoutingKey is used.
+
+Exchanges are not declared automatically unless WithPublisherOptionsExchangeDeclare or WithConsumerOptionsExchangeDeclare is provided.
+
+See the Go documentation for all available options.
+
+Closing resources
+Close publishers and consumers when you are finished with them. Do not reuse a publisher or consumer after closing it. Close the connection only after all associated publishers and consumers have been closed.
+
+Examples
+See the examples directory for additional usage examples.
+
+Integration tests
+Set ENABLE_DOCKER_INTEGRATION_TESTS=TRUE while running the test suite to launch a RabbitMQ container through the local Docker daemon:
 
 bash
-go get github.com/wagslane/go-rabbitmq
-Options and Configuring
-By default, queues are declared if they didn't already exist by new consumers
-
-By default, routing-key bindings are declared by consumers if you're using WithConsumerOptionsRoutingKey
-
-By default, exchanges are not declared by publishers or consumers if they don't already exist, hence WithPublisherOptionsExchangeDeclare and WithConsumerOptionsExchangeDeclare
-
-Read up on all the options in the GoDoc, there are quite a few of them. I try to pick sane and simple defaults.
-
-Closing and Resources
-Close your publishers and consumers when you're done with them and do not attempt to reuse them
-
-Only close the connection itself once you've closed all associated publishers and consumers
-
-Other Usage Examples
-See the examples directory for more ideas.
-
-Deploy
-(Add your deployment instructions here)
-
-Contributing
-I would love your help! Contribute by forking the repo and opening pull requests. Please ensure that your code passes the existing tests and linting, and write tests to test your changes if applicable.
-
-All pull requests should be submitted to the main branch.
-
-Integration Testing
-By setting ENABLE_DOCKER_INTEGRATION_TESTS=TRUE during go test -v ./..., the integration tests will run. These launch a RabbitMQ container in the local Docker daemon and test some publish/consume actions.
-
+ENABLE_DOCKER_INTEGRATION_TESTS=TRUE go test -v ./...
 See integration_test.go.
 
-Stability
-Note that the API is currently in v0. I don't plan on huge changes, but there may be some small breaking changes before we hit v1.
+Deploy
+This library is imported into a Go application and does not require a separate deployment. Deploy the application together with a reachable RabbitMQ instance. Configure the AMQP connection string through an environment variable or another secret-management system rather than hard-coding credentials.
 
-Transient Dependencies
-My goal is to keep dependencies limited to 1: github.com/rabbitmq/amqp091-go.
+Contributing
+Contributions are welcome. Fork the repository, create a branch, and open a pull request against the main branch.
+
+Before submitting a pull request:
+
+Run the existing tests and linters.
+
+Add or update tests for your changes where appropriate.
+
+Keep the public API and documentation consistent.
+
+Explain any breaking or behavioral changes in the pull request description.
+
+Stability
+The API is currently in v0. There are no plans for major changes, but small breaking changes may occur before v1.
+
+Dependencies
+The project aims to keep transient dependencies limited to github.com/rabbitmq/amqp091-go.
 
 Contact
-🐦 Twitter: Follow
+Open an issue on GitHub
 
-🐛 Issues: Submit an issue here on GitHub
+Follow on Twitter
 
 License
-(Add your license here)
+See the repository's license file for licensing information.

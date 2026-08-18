@@ -1,34 +1,38 @@
-go-rabbitmq
-A wrapper of rabbitmq/amqp091-go that provides reconnection logic and sane defaults. Hit the project with a star if you find it useful ⭐
+# go-rabbitmq
 
-Supported by Boot.dev. If you'd like to learn about RabbitMQ and Go, check out the course here.
+A wrapper of [`rabbitmq/amqp091-go`](https://github.com/rabbitmq/amqp091-go) that provides reconnection logic and sane defaults. Hit the project with a star if you find it useful ⭐
 
-Motivation
-Streadway's AMQP library is a robust and well-supported Go client. It is a great option when you need a low-level AMQP client, but it intentionally stays close to the AMQP protocol and does not provide reconnection logic or many ease-of-use abstractions.
+Supported by Boot.dev. If you'd like to learn about RabbitMQ and Go, you can check out the course [here](https://www.boot.dev/lessons/0a483dcd-2d69-435e-9216-d5915c88b8e1).
 
-Goal
-go-rabbitmq provides much of the useful functionality of an AMQP client through a higher-level API designed specifically for RabbitMQ. The project focuses on:
+## Motivation
 
-Automatic reconnection
+Streadway's AMQP library is a robust, well-supported Go client. It intentionally stays close to the AMQP protocol, so it does not provide reconnection logic or many high-level convenience abstractions.
 
-Multithreaded consumers through handler functions
+The goal of `go-rabbitmq` is to provide a higher-level API designed specifically for RabbitMQ, while keeping sensible defaults.
 
-Reasonable defaults
+Features include:
 
-Flow-control handling
+- Automatic reconnection
+- Multithreaded consumers through handler functions
+- Reasonable defaults
+- Flow-control handling
+- TCP-block handling
 
-TCP-block handling
+## Quick Start
 
-Quick Start
-Installation
-Inside a Go module:
+### Install
 
-bash
+Inside a Go module, install the package:
+
+```bash
 go get github.com/wagslane/go-rabbitmq
-Consumer
-The queue is declared automatically. Exchanges are not declared unless you enable the exchange-declaration option. Consumers can also declare routing-key bindings.
+```
 
-go
+### Consumer
+
+The queue is declared automatically. The exchange is not declared unless you explicitly enable that option.
+
+```go
 conn, err := rabbitmq.NewConn(
     "amqp://guest:guest@localhost",
     rabbitmq.WithConnectionOptionsLogging,
@@ -57,10 +61,13 @@ err = consumer.Run(func(d rabbitmq.Delivery) rabbitmq.Action {
 if err != nil {
     log.Fatal(err)
 }
-Publisher
-The exchange is not declared by default, so use the exchange options when the application should create it automatically.
+```
 
-go
+### Publisher
+
+Use the exchange declaration option if your application needs to create the exchange.
+
+```go
 conn, err := rabbitmq.NewConn(
     "amqp://guest:guest@localhost",
     rabbitmq.WithConnectionOptionsLogging,
@@ -90,55 +97,69 @@ err = publisher.Publish(
 if err != nil {
     log.Println(err)
 }
-Usage
-Options and configuration
-Queues are declared automatically by new consumers unless configured otherwise.
+```
 
-Routing-key bindings are declared by consumers when WithConsumerOptionsRoutingKey is used.
+## Usage
 
-Exchanges are not declared automatically unless WithPublisherOptionsExchangeDeclare or WithConsumerOptionsExchangeDeclare is provided.
+### Configuration
 
-See the Go documentation for all available options.
+- Queues are declared automatically for new consumers.
+- Routing-key bindings are declared when `WithConsumerOptionsRoutingKey` is used.
+- Exchanges are not declared automatically unless you use:
+  - `WithPublisherOptionsExchangeDeclare`
+  - `WithConsumerOptionsExchangeDeclare`
 
-Closing resources
-Close publishers and consumers when you are finished with them. Do not reuse a publisher or consumer after closing it. Close the connection only after all associated publishers and consumers have been closed.
+See the [Go documentation](https://pkg.go.dev/github.com/wagslane/go-rabbitmq) for all configuration options.
 
-Examples
-See the examples directory for additional usage examples.
+### Closing resources
 
-Integration tests
-Set ENABLE_DOCKER_INTEGRATION_TESTS=TRUE while running the test suite to launch a RabbitMQ container through the local Docker daemon:
+Close publishers and consumers when you are finished with them. Do not reuse them after closing. Close the RabbitMQ connection only after closing all associated publishers and consumers.
 
-bash
+### Integration tests
+
+Run integration tests with Docker enabled:
+
+```bash
 ENABLE_DOCKER_INTEGRATION_TESTS=TRUE go test -v ./...
-See integration_test.go.
+```
 
-Deploy
-This library is imported into a Go application and does not require a separate deployment. Deploy the application together with a reachable RabbitMQ instance. Configure the AMQP connection string through an environment variable or another secret-management system rather than hard-coding credentials.
+The tests start a RabbitMQ container using your local Docker daemon.
 
-Contributing
-Contributions are welcome. Fork the repository, create a branch, and open a pull request against the main branch.
+## 🤝 Contributing
 
-Before submitting a pull request:
+### Clone the repository
 
-Run the existing tests and linters.
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+cd YOUR_REPOSITORY
+```
 
-Add or update tests for your changes where appropriate.
+Replace `YOUR_USERNAME` and `YOUR_REPOSITORY` with your GitHub repository details.
 
-Keep the public API and documentation consistent.
+### Run tests
 
-Explain any breaking or behavioral changes in the pull request description.
+```bash
+go test ./...
+```
 
-Stability
-The API is currently in v0. There are no plans for major changes, but small breaking changes may occur before v1.
+### Run integration tests
 
-Dependencies
-The project aims to keep transient dependencies limited to github.com/rabbitmq/amqp091-go.
+```bash
+ENABLE_DOCKER_INTEGRATION_TESTS=TRUE go test -v ./...
+```
 
-Contact
-Open an issue on GitHub
+### Submit a pull request
 
-Follow on Twitter
+1. Fork the repository.
+2. Create a branch for your change.
+3. Add or update tests where appropriate.
+4. Ensure tests and linting pass.
+5. Open a pull request to the `main` branch.
 
-License
-See the repository's license file for licensing information.
+## Stability
+
+The API is currently in v0. Small breaking changes may occur before v1.
+
+## License
+
+See the repository license file for licensing information.
